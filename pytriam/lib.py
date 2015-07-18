@@ -22,7 +22,8 @@ class ToxOptions():
         self.savedata_length = 0
 
 class Av(ToxAV):
-    pass
+    def __init__(self, core, max_calls):
+        pass
 
 class Core(Tox):
     def __init__(self, messager, bot, bootstrap):
@@ -60,6 +61,8 @@ class Core(Tox):
         })
 
     def on_group_message(self, gnum, fgnum, message):
+        if self.group_peername(gnum, fgnum) == self.self_get_name():
+            return
         self.messager.trigger('group.message', {
             'gnum': gnum,
             'fgnum': fgnum,
@@ -72,6 +75,8 @@ class Core(Tox):
         })
 
     def on_group_action(self, gnum, fgnum, message):
+        if self.group_peername(gnum, fgnum) == self.self_get_name():
+            return
         self.messager.trigger('group.message', {
             'gnum': gnum,
             'fgnum': fgnum,

@@ -9,7 +9,7 @@ im = Messager("./config.json")
 def init(this ,arguments):
     print("ID: {}".format(this.core.self_get_address()))
 
-@im.on('tox.status')
+@im.on('tox.connect')
 def status(this, arguments):
     print("{} to Tox Network.".format(arguments.get('status')))
 
@@ -22,15 +22,25 @@ def frequest(this, arguments):
     this.core.friend_add_norequest(arguments.get('pk'))
 
 @im.on('friend.message')
-def message(this, arguments):
+def friend_message(this, arguments):
     this.core.friend_send_message(
         arguments.get('fid'),
         arguments.get('message')
     )
 
 @im.on('group.invite')
-def invite(this, arguments):
-    pass
+def group_invite(this, arguments):
+    this.core.join_groupchat(
+        arguments.get('fnum'),
+        arguments.get('data')
+    )
+
+@im.on('group.message.normal')
+def group_message(this, arguments):
+    this.core.group_message_send(
+        arguments.get('gnum'),
+        arguments.get('message')
+    )
 
 if __name__ == '__main__':
     try:
