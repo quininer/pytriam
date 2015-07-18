@@ -1,0 +1,13 @@
+{
+    "bootstrap": {
+        "ip": "127.0.0.1",
+        "port": 33445,
+        "key": "EDF5A5BE8DFFC1DDFAACC71A0C0FCEEDE7BED4F3FBF9C54D502BE66A297DC374"
+    },
+    "bot": {
+        "name": "triam",
+        "profile": "./profile.tox",
+        "status": "A4.",
+        "owner": "EDF5A5BE8DFFC1DDFAACC71A0C0FCEEDE7BED4F3FBF9C54D502BE66A297DC374"
+    }
+}
