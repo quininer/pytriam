@@ -29,8 +29,8 @@ class Core(Tox):
     def __init__(self, messager, bot, bootstrap):
         options = ToxOptions()
 
-        if exists(bot.get('profile') or "./profile.tox"):
-            data = open(bot.get('profile') or "./profile.tox", 'rb').read()
+        if exists(bot.get('profile', './profile.tox')):
+            data = open(bot.get('profile', './profile.tox'), 'rb').read()
             options.savedata_data = data
             options.savedata_length = len(data)
             options.savedata_type = 1
@@ -40,63 +40,134 @@ class Core(Tox):
         self.messager = messager
         self.av = Av(self, 12)
         self.bootstrap(
-            bootstrap.get('ip') or '127.0.0.1',
-            bootstrap.get('port') or 33445,
+            bootstrap.get('ip', '127.0.0.1'),
+            bootstrap.get('port', 33445),
             bootstrap.get('key')
         )
-        self.self_set_name(bot.get('name') or 'triam')
-        self.self_set_status_message(bot.get('status') or 'A4.')
+        self.self_set_name(bot.get('name', 'triam'))
+        self.self_set_status_message(bot.get('status', 'A4.'))
 
-    def on_friend_request(self, pk, message):
+    def on_file_recv(self, *args):
+        pass
+
+    def on_friend_request(self, public_key, message):
+        """
+        friend request event.
+            - public_key    friend public key.
+            - message       request message.
+
+        friend.request:
+            | target        target, public key.
+            | message       request message.
+        """
         self.messager.trigger('friend.request', {
-            'pk': pk,
+            'target': public_key,
             'message': message
         })
 
-    def on_group_invite(self, fnum, kind, data):
+    def on_group_invite(self, friend_number, kind, group_public_key):
+        """
+        group invite event.
+            - friend_number     friend number.
+            - kind              group type. (text | audio)
+            - group_public_key  group public key.
+
+        group.invite:
+            | target            friend number.
+            | type              group type. (text | audio)
+            | data              group public key.
+        """
         self.messager.trigger('group.invite', {
-            'fnum': fnum,
-            'kind': kind,
-            'data': data
+            'target': friend_number,
+            'type': kind,
+            'data': group_public_key
         })
 
-    def on_group_message(self, gnum, fgnum, message):
-        if self.group_peername(gnum, fgnum) == self.self_get_name():
+    def on_group_message(self, group_number, friend_group_number, message):
+        """
+        group message event.
+            - group_number          group number.
+            - friend_group_number   friend number on group.
+            - message               group message.
+
+        group.message:
+            * group message, not from self
+        group.message.normal:
+            * only normal message
+
+            - target                group number
+            - member                friend number on group.
+            - message               group normal message.
+        """
+        if self.group_peername(group_number, friend_group_number) == self.self_get_name():
             return
         self.messager.trigger('group.message', {
-            'gnum': gnum,
-            'fgnum': fgnum,
+            'target': group_number,
+            'member': friend_group_number,
             'message': message
         })
         self.messager.trigger('group.message.normal', {
-            'gnum': gnum,
-            'fgnum': fgnum,
+            'target': group_number,
+            'member': friend_group_number,
             'message': message
         })
 
-    def on_group_action(self, gnum, fgnum, message):
-        if self.group_peername(gnum, fgnum) == self.self_get_name():
+    def on_group_action(self, group_number, friend_group_number, message):
+        """
+        group message event.
+            - group_number          group number.
+            - friend_group_number   friend number on group.
+            - message               group message.
+
+        group.message:
+            * group message, not from self
+        group.message.normal:
+            * only action message
+
+            - target                group number
+            - member                friend number on group.
+            - message               group action message.
+        """
+        if self.group_peername(group_number, friend_group_number) == self.self_get_name():
             return
         self.messager.trigger('group.message', {
-            'gnum': gnum,
-            'fgnum': fgnum,
+            'gnum': group_number,
+            'fgnum': friend_group_number,
             'message': message
         })
         self.messager.trigger('group.message.action', {
-            'gnum': gnum,
-            'fgnum': fgnum,
+            'gnum': group_number,
+            'fgnum': friend_group_number,
             'message': message
         })
 
-    def on_friend_message(self, fid, message):
+    def on_friend_message(self, friend_number, message):
+        """
+        friend message.
+            - friend_number friend number
+            - message       message
+
+        friend.message:
+            | target        friend number
+            | message       message
+        """
         self.messager.trigger('friend.message', {
-            'fid': fid,
+            'target': friend_number,
             'message': message
         })
 
-    def on_friend_connection_status(self, fid, status):
+    def on_friend_connection_status(self, friend_number, status):
+        """
+        friend connection status.
+            - friend_number     friend number
+            - status            connection status
+
+        friend.status:
+            | target            friend number
+            | status            connection status
+        """
         self.messager.trigger('friend.status', {
-            'fid': fid,
+            'target': friend_number,
             'status': status
         })
 
@@ -122,18 +193,30 @@ class Core(Tox):
             self.iterate()
             sleep(0.01)
 
+
+class GroupMessager(object):
+    def __init__(self, messager, group_number):
+        pass
+
+
 class Messager(object):
     def __init__(self, path):
         config = loads(open(path).read())
-        self.bot = config.get('bot') or {}
-        self.bootstrap = config.get('bootstrap') or {}
+        self.bot = config.get('bot', {})
+        self.bootstrap = config.get('bootstrap', {})
         self.events = {}
 
         self.core = Core(self, self.bot, self.bootstrap)
 
+    def group(self, group_number):
+        return GroupMessager(self, group_number)
+
+    def send():
+        pass
+
     def save(self):
         open(
-            self.bot.get('profile') or "./profile.tox",
+            self.bot.get('profile', './profile.tox'),
             'wb'
         ).write(self.core.get_savedata())
 
@@ -145,7 +228,7 @@ class Messager(object):
         return on_event
 
     def trigger(self, name, arguments):
-        for fn in self.events.get(name) or []:
+        for fn in self.events.get(name,  []):
             fn(self, arguments)
 
     def run(self):

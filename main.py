@@ -37,10 +37,11 @@ def group_invite(this, arguments):
 
 @im.on('group.message.normal')
 def group_message(this, arguments):
-    this.core.group_message_send(
-        arguments.get('gnum'),
-        arguments.get('message')
-    )
+    if arguments.get('message').startswith('[LQYMGT]'):
+        this.core.group_message_send(
+            arguments.get('gnum'),
+            "LQYMGT: 好棒！"
+        )
 
 if __name__ == '__main__':
     try:
