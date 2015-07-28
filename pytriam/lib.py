@@ -47,7 +47,25 @@ class Core(Tox):
         self.self_set_name(bot.get('name', 'triam'))
         self.self_set_status_message(bot.get('status', 'A4.'))
 
-    def on_file_recv(self, *args):
+    def on_group_namelist_change(self, group_number, peer_number, change):
+        pass
+
+    def on_file_send_request(self, friend_number, file_number, file_size, filename):
+        pass
+
+    def on_file_control(self, friend_number, receive_send, file_number, control_type, data):
+        pass
+
+    def on_file_data(friend_number, file_number, data):
+        pass
+
+    def on_file_recv(self, friend_number, file_number, kind, file_size, filename, filename_length):
+        pass
+
+    def on_file_recv_control(self, friend_number, file_number, control):
+        pass
+
+    def on_file_recv_chunk(self, friend_number, file_number, position, data, length):
         pass
 
     def on_friend_request(self, public_key, message):
@@ -96,19 +114,19 @@ class Core(Tox):
             * only normal message
 
             - target                group number
-            - member                friend number on group.
+            - peer                friend number on group.
             - message               group normal message.
         """
         if self.group_peername(group_number, friend_group_number) == self.self_get_name():
             return
         self.messager.trigger('group.message', {
             'target': group_number,
-            'member': friend_group_number,
+            'peer': friend_group_number,
             'message': message
         })
         self.messager.trigger('group.message.normal', {
             'target': group_number,
-            'member': friend_group_number,
+            'peer': friend_group_number,
             'message': message
         })
 
@@ -125,19 +143,19 @@ class Core(Tox):
             * only action message
 
             - target                group number
-            - member                friend number on group.
+            - peer                friend number on group.
             - message               group action message.
         """
         if self.group_peername(group_number, friend_group_number) == self.self_get_name():
             return
         self.messager.trigger('group.message', {
-            'gnum': group_number,
-            'fgnum': friend_group_number,
+            'target': group_number,
+            'peer': friend_group_number,
             'message': message
         })
         self.messager.trigger('group.message.action', {
-            'gnum': group_number,
-            'fgnum': friend_group_number,
+            'target': group_number,
+            'peer': friend_group_number,
             'message': message
         })
 
@@ -196,7 +214,50 @@ class Core(Tox):
 
 class GroupMessager(object):
     def __init__(self, messager, group_number):
-        pass
+        self.im = messager
+        self.core = messager.core
+        self.group_number = group_number
+
+    def send(self, message, kind='normal'):
+        """
+        send message to group.
+            - target        group number
+            - message       message
+            - kind          message type, (normal | actioin)
+        """
+        {
+            'normal': self.core.group_message_send,
+            'action': self.core.group_action_send,
+        }[kind](
+            self.grouop_number,
+            message
+        )
+
+    def get_nick(self, target):
+        """
+        get target nick from group
+            - target        friend number on group
+
+            @ nick<str>     target nick
+        """
+        return self.core.group_peername(
+            self.group_number,
+            target
+        )
+
+    def get_title(self):
+        """
+        get group title.
+            @ title<str>    group title.
+        """
+        return self.core.group_get_title(self.group_number)
+
+    def set_title(self, title):
+        """
+        set group title.
+            - title     title string.
+        """
+        self.core.group_set_title(title)
 
 
 class Messager(object):
@@ -211,8 +272,52 @@ class Messager(object):
     def group(self, group_number):
         return GroupMessager(self, group_number)
 
-    def send():
-        pass
+    def join(self, kind='text', friend_number=None, data=None):
+        """
+        accept group invite or create group.
+            - kind              group type
+            - friend_number     inviter friend number
+            - data              group public key
+
+            @ group<GroupMessager>
+        """
+        if not (friend_number or data):
+            return self.group(self.core.add_groupchat())
+
+        return self.group({
+            'text': self.core.join_groupchat
+            # 'audio': self.core.av.join_groupchat
+            # XXX PyTox no support
+        }[kind](
+            friend_number,
+            data
+        ))
+
+    def send(self, target, message, kind='normal'):
+        """
+        send message to friend.
+            - target        friend number
+            - message       message
+            - kind          message type, (normal)
+        """
+        {
+            'normal': self.core.friend_send_message,
+            # 'action': self.core.friend_send_action
+            # XXX PyTox missing
+        }[kind](target, message)
+
+    def get_nick(self, target=None):
+        """
+        get target nick, None is self.
+            - target        friend number or None
+
+            @ nick<str>     target nick
+        """
+        return (
+            self.core.friend_get_name(target)
+            if target else
+            self.core.self_get_name()
+        )
 
     def save(self):
         open(
