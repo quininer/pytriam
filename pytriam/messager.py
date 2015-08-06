@@ -17,7 +17,7 @@ class GroupMessager(object):
         send message to group.
             - target        group number
             - message       message
-            - kind          message type, (normal | actioin)
+            - kind          message type, (normal | action)
         """
         {
             'normal': self.core.group_message_send,
