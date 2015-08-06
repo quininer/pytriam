@@ -108,7 +108,7 @@ class Core(Tox):
         """
         self.messager.trigger('group.invite', {
             'target': friend_number,
-            'kind': kind,
+            'kind': ('text', 'audio')[kind],
             'data': group_public_key
         })
         self.messager.trigger(
@@ -123,7 +123,7 @@ class Core(Tox):
         """
         group message event.
             - group_number          group number.
-            - peer   friend number on group.
+            - peer                  friend number on group.
             - message               group message.
 
         group.message:
@@ -131,9 +131,9 @@ class Core(Tox):
         group.message.normal:
             * only normal message
 
-            - target                group number
-            - peer                friend number on group.
-            - message               group normal message.
+            | target                group number
+            | peer                  friend number on group.
+            | message               group normal message.
         """
         if self.group_peername(group_number, peer) == self.self_get_name():
             return
@@ -152,7 +152,7 @@ class Core(Tox):
         """
         group message event.
             - group_number          group number.
-            - peer   friend number on group.
+            - peer                  friend number on group.
             - message               group message.
 
         group.message:
@@ -160,9 +160,9 @@ class Core(Tox):
         group.message.normal:
             * only action message
 
-            - target                group number
-            - peer                friend number on group.
-            - message               group action message.
+            | target                group number
+            | peer                friend number on group.
+            | message               group action message.
         """
         if self.group_peername(group_number, peer) == self.self_get_name():
             return

@@ -3,7 +3,6 @@
 
 from pytriam import Messager
 
-
 im = Messager("./config.json")
 
 

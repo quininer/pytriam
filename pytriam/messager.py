@@ -67,6 +67,15 @@ class Messager(object):
     def id(self):
         return self.core.self_get_address()
 
+    def set_nick(self, nick):
+        self.core.self_set_name(nick)
+
+    def add_friend(self, public_key, message=None):
+        if message is None:
+            self.core.friend_add_norequest(public_key)
+        else:
+            self.core.friend_add(public_key, message)
+
     def group(self, group_number):
         return GroupMessager(self, group_number)
 
