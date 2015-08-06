@@ -39,7 +39,8 @@ class GroupMessager(object):
             target
         )
 
-    def get_title(self):
+    @property
+    def title(self):
         """
         get group title.
             @ title<str>    group title.
@@ -56,9 +57,9 @@ class GroupMessager(object):
 
 class Messager(object):
     def __init__(self, path):
-        config = loads(open(path).read())
-        self.bot = config.get('bot', {})
-        self.bootstrap = config.get('bootstrap', {})
+        self.config = loads(open(path).read())
+        self.bot = self.config.get('bot', {})
+        self.bootstrap = self.config.get('bootstrap', {})
         self.events = {}
 
         self.core = Core(self, self.bot, self.bootstrap)
@@ -125,6 +126,9 @@ class Messager(object):
             if target is None else
             self.core.friend_get_name(target)
         )
+
+    def get_num(self, target=None):
+        return self.core.friend_by_public_key(target)
 
     def save(self):
         open(

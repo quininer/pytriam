@@ -128,10 +128,11 @@ class Core(Tox):
 
         group.message:
             * group message, not from self
+            | kind                  message type.
         group.message.normal:
             * only normal message
 
-            | target                group number
+            | target                group number.
             | peer                  friend number on group.
             | message               group normal message.
         """
@@ -140,6 +141,7 @@ class Core(Tox):
         self.messager.trigger('group.message', {
             'target': group_number,
             'peer': peer,
+            'kind': 'normal',
             'message': message
         })
         self.messager.trigger('group.message.normal', {
@@ -157,11 +159,12 @@ class Core(Tox):
 
         group.message:
             * group message, not from self
+            | kind                  message type.
         group.message.normal:
             * only action message
 
-            | target                group number
-            | peer                friend number on group.
+            | target                group number.
+            | peer                  friend number on group.
             | message               group action message.
         """
         if self.group_peername(group_number, peer) == self.self_get_name():
@@ -169,6 +172,7 @@ class Core(Tox):
         self.messager.trigger('group.message', {
             'target': group_number,
             'peer': peer,
+            'kind': 'action',
             'message': message
         })
         self.messager.trigger('group.message.action', {
