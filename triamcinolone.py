@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from json import loads
+
 from pytriam import Messager
 
-im = Messager("./config.json")
+im = Messager(loads(open("./config.json").read()))
 
 
 @im.on('tox.init')

@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from json import loads
-
 from .lib import Core
 
 
@@ -56,8 +54,8 @@ class GroupMessager(object):
 
 
 class Messager(object):
-    def __init__(self, path):
-        self.config = loads(open(path).read())
+    def __init__(self, config):
+        self.config = config
         self.bot = self.config.get('bot', {})
         self.bootstrap = self.config.get('bootstrap', {})
         self.events = {}
