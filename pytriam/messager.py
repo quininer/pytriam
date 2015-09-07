@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 from .lib import Core
+from pytox import Tox
 
 
 class GroupMessager(object):
@@ -106,11 +107,10 @@ class Messager(object):
             - message       message
             - kind          message type, (normal)
         """
-        {
-            'normal': self.core.friend_send_message,
-            # 'action': self.core.friend_send_action
-            # XXX PyTox missing
-        }[kind](target, message)
+        self.core.friend_send_message(target, {
+            'normal': Tox.MESSAGE_TYPE_NORMAL,
+            'action': Tox.MESSAGE_TYPE_ACTION
+        }[kind], message)
 
     def get_nick(self, target=None):
         """
