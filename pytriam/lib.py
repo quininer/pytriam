@@ -181,7 +181,13 @@ class Core(Tox):
             'message': message
         })
 
-    def on_friend_message(self, friend_number, message):
+    def on_friend_typing(self, friend_number, is_typing):
+        self.messager.trigger('friend.typing', {
+            'target': friend_number,
+            'status': is_typing
+        });
+
+    def on_friend_message(self, friend_number, kind, message):
         """
         friend message.
             - friend_number friend number
@@ -193,6 +199,7 @@ class Core(Tox):
         """
         self.messager.trigger('friend.message', {
             'target': friend_number,
+            'kind': kind,
             'message': message
         })
 
