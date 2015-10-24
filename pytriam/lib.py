@@ -66,8 +66,8 @@ class Core(Tox):
         pass
 
     def on_file_recv(
-        self, friend_number, file_number, kind,
-        file_size, filename, filename_length
+        self, friend_number, file_number,
+        kind, file_size, filename
     ):
         pass
 
@@ -241,8 +241,11 @@ class Core(Tox):
 
             try:
                 self.iterate()
-            except UnicodeDecodeError as err:
+            except Exception as err:
                 #  HACK this is PyTox bug.
                 print("warning: {!r}".format(err))
+                self.messager.trigger('tox.error', {
+                    'error': err
+                })
 
             time.sleep(0.01)
